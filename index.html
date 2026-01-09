@@ -369,6 +369,11 @@ header {
   color: white;
 }
 
+.access-badge.featured {
+  background: linear-gradient(135deg, #ec4899, #f97316);
+  color: white;
+}
+
 .prompt-title {
   font-size: 1.3rem;
   font-weight: 700;
@@ -479,6 +484,29 @@ header {
   background: #10b981;
 }
 
+.affiliate-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  margin-top: 8px;
+}
+
+.affiliate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
 .timer-text {
   display: none;
   text-align: center;
@@ -569,7 +597,7 @@ footer {
     </div>
     <nav class="nav-links">
       <a href="#prompts">Browse</a>
-      <a href="#add">Submit Prompt</a>
+      <a href="add.html">Submit Prompt</a>
       <a href="#about">About</a>
     </nav>
   </div>
@@ -587,7 +615,7 @@ footer {
   </div>
 
   <div class="cta-buttons">
-    <a href="#add" class="btn btn-primary">
+    <a href="add.html" class="btn btn-primary">
       <span>➕</span> Submit Your Prompt
     </a>
     <a href="#prompts" class="btn btn-secondary">
@@ -668,7 +696,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const prompts = await response.json();
+    let prompts = await response.json();
+
+    // Sort prompts: social first, then by submittedAt desc
+    prompts.sort((a, b) => {
+      if (a.accessType !== b.accessType) {
+        return a.accessType === 'social' ? -1 : 1;
+      }
+      return new Date(b.submittedAt || b.createdAt) - new Date(a.submittedAt || a.createdAt);
+    });
 
     // Clear loading state
     promptGrid.innerHTML = '';
@@ -707,7 +743,7 @@ function createPromptCard(prompt) {
   } else if (prompt.promptType === 'video' && prompt.previewUrl) {
     mediaHtml = `
       <div class="media-wrapper">
-        <video class="sample-image" autoplay muted loop playsinline>
+        <video class="sample-image" preload="none" muted loop playsinline>
           <source src="${prompt.previewUrl}" type="video/mp4">
         </video>
         <span class="media-tag">VIDEO</span>
@@ -715,7 +751,9 @@ function createPromptCard(prompt) {
     `;
   }
 
+  const isFeatured = prompt.featured && prompt.featuredTill && Date.now() < prompt.featuredTill;
   const accessBadge = prompt.accessType === 'free' ? '<span class="access-badge free">FREE</span>' : '<span class="access-badge premium">PREMIUM</span>';
+  const featuredBadge = isFeatured ? '<span class="access-badge featured">🔥 FEATURED</span>' : '';
 
   const buttonHtml = prompt.accessType === 'free' ?
     `<button class="copy-btn" onclick="copyPrompt(this)">
@@ -726,24 +764,33 @@ function createPromptCard(prompt) {
     </button>
     <div class="timer-text"></div>`;
 
+  const affiliateButtonHtml = prompt.affiliateLink ?
+    `<button class="affiliate-btn" onclick="openAffiliateLink('${prompt.affiliateLink}')">
+      <span>🚀</span> Open in ${prompt.toolName || 'Tool'}
+    </button>` : '';
+
   const previewOrFull = prompt.accessType === 'free' ?
     `<pre class="full-prompt">${prompt.fullPrompt}</pre>` :
     `<div class="preview-text">${prompt.preview}</div>
      <pre class="full-prompt">${prompt.fullPrompt}</pre>`;
 
   card.innerHTML = `
-    <span class="category-badge">${prompt.category}</span>${accessBadge}
+    <span class="category-badge">${prompt.category}</span>${accessBadge}${featuredBadge}
     <h3 class="prompt-title">${prompt.title}</h3>
     ${mediaHtml}
     ${previewOrFull}
     ${buttonHtml}
+    ${affiliateButtonHtml}
   `;
 
   // Apply unlock UI for free prompts or already unlocked social prompts
   if (prompt.accessType === 'free') {
     unlockPromptUI(card, {direct: true});
-  } else if (prompt.accessType === 'social' && localStorage.getItem(`unlocked_prompt_${prompt.id}`)) {
-    unlockPromptUI(card);
+  } else if (prompt.accessType === 'social') {
+    const saved = localStorage.getItem(`unlocked_prompt_${prompt.id}`);
+    if (saved && Date.now() - Number(saved) < 24 * 60 * 60 * 1000) {
+      unlockPromptUI(card);
+    }
   }
 
   return card;
@@ -753,6 +800,11 @@ function unlockPrompt(button) {
   const card = button.closest('.prompt-card');
   const id = card.dataset.id;
   const link = card.dataset.unlockLink;
+
+  if (!link) {
+    alert("Unlock link not available");
+    return;
+  }
 
   window.open(link, '_blank');
 
@@ -768,7 +820,7 @@ function unlockPrompt(button) {
       clearInterval(timer);
       timerDiv.style.display = 'none';
       unlockPromptUI(card);
-      localStorage.setItem(`unlocked_prompt_${id}`, 'true');
+      localStorage.setItem(`unlocked_prompt_${id}`, Date.now().toString());
     }
   }, 1000);
 }
@@ -791,7 +843,7 @@ function unlockPromptUI(card, options = {}) {
 function copyPrompt(button) {
   const card = button.closest('.prompt-card');
   const promptText = card.querySelector('.full-prompt').innerText;
-  
+
   navigator.clipboard.writeText(promptText).then(() => {
     button.innerHTML = '<span>✅</span> Copied!';
     button.classList.add('copied');
@@ -800,6 +852,10 @@ function copyPrompt(button) {
       button.classList.remove('copied');
     }, 2000);
   });
+}
+
+function openAffiliateLink(link) {
+  window.open(link, '_blank');
 }
 </script>
 

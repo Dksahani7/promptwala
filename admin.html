@@ -130,6 +130,14 @@ function updatePrompt(id, updates){
     }
   });
 }
+
+const salesBanner = document.createElement("div");
+salesBanner.className = "card";
+salesBanner.innerHTML = `
+  <h3>💰 Want to sell a featured slot?</h3>
+  <p>Price: ₹100/24h. Contact: [Your WhatsApp/Email]</p>
+`;
+document.getElementById("list").appendChild(salesBanner);
 </script>
 </body>
 </html>

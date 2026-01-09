@@ -1,0 +1,13 @@
+name = "promptwala-api"
+main = "src/worker.js"
+compatibility_date = "2024-12-18"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "promptwala-images"
+preview_bucket_name = "promptwala-images"
+
+[[kv_namespaces]]
+binding = "DB"
+id = "29792a1689254b588d525761b5732d31"
+preview_id = "29792a1689254b588d525761b5732d31"

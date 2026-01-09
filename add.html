@@ -539,17 +539,39 @@ footer a:hover {
     </div>
 
     <div class="form-group">
+      <label for="promptType">Prompt Type <span class="required">*</span></label>
+      <select id="promptType" required>
+        <option value="">Select type</option>
+        <option value="image">Image Prompt</option>
+        <option value="video">Video Prompt</option>
+        <option value="text">Text / Other</option>
+      </select>
+      <span class="helper-text">
+        Most prompts will be Image or Video for your use case.
+      </span>
+    </div>
+
+    <div class="form-group">
       <label for="tags">
         Tags (optional)
       </label>
       <div class="tag-input-wrapper">
-        <input 
-          type="text" 
-          id="tags" 
+        <input
+          type="text"
+          id="tags"
           placeholder="Type tag and press Enter (e.g., viral, chatgpt, business)">
         <span class="helper-text">Press Enter after each tag. Max 5 tags.</span>
         <div class="tags-display" id="tagsDisplay"></div>
       </div>
+    </div>
+
+    <div class="form-group" id="previewUrlGroup">
+      <label for="previewUrl">Preview Image / Video URL</label>
+      <input type="url" id="previewUrl"
+             placeholder="https://... (image or video thumbnail)">
+      <span class="helper-text">
+        For image/video prompts, add a sample output screenshot or thumbnail.
+      </span>
     </div>
 
     <div class="form-group">
@@ -706,6 +728,18 @@ function removeTag(index) {
   renderTags();
 }
 
+// Prompt type handling
+const promptType = document.getElementById('promptType');
+const previewUrl = document.getElementById('previewUrl');
+
+promptType.addEventListener('change', () => {
+  if (promptType.value === 'image' || promptType.value === 'video') {
+    previewUrl.required = true;
+  } else {
+    previewUrl.required = false;
+  }
+});
+
 // Access type handling
 const accessType = document.getElementById('accessType');
 const socialFields = document.getElementById('socialFields');
@@ -727,11 +761,13 @@ accessType.addEventListener('change', () => {
 });
 
 // Form submission
-document.getElementById('addPromptForm').addEventListener('submit', function(e) {
+document.getElementById('addPromptForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
   const title = document.getElementById('title').value.trim();
   const category = document.getElementById('category').value;
+  const promptTypeValue = document.getElementById('promptType').value;
+  const previewUrlValue = document.getElementById('previewUrl').value.trim();
   const preview = document.getElementById('preview').value.trim();
   const fullPrompt = document.getElementById('fullPrompt').value.trim();
   const accessTypeValue = document.getElementById('accessType').value;
@@ -757,14 +793,12 @@ document.getElementById('addPromptForm').addEventListener('submit', function(e) 
     }
   }
 
-  // Generate ID
-  const id = Date.now().toString();
-
   // Create prompt object
   const newPrompt = {
-    id,
     title,
     category,
+    promptType: promptTypeValue,
+    previewUrl: previewUrlValue,
     tags: tagsArray,
     preview,
     fullPrompt,
@@ -773,24 +807,42 @@ document.getElementById('addPromptForm').addEventListener('submit', function(e) 
     submittedAt: new Date().toISOString()
   };
 
-  // Save to localStorage
-  const existingPrompts = JSON.parse(localStorage.getItem('userPrompts') || '[]');
-  existingPrompts.push(newPrompt);
-  localStorage.setItem('userPrompts', JSON.stringify(existingPrompts));
+  try {
+    // Send to API
+    const response = await fetch('https://promptwala-api.ashokjaji7890.workers.dev/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newPrompt)
+    });
 
-  // Show success modal
-  document.getElementById('successModal').classList.add('show');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-  // Reset form
-  this.reset();
-  tagsArray.length = 0;
-  renderTags();
-  socialFields.style.display = 'none';
-  unlockLinkInput.required = false;
-  unlockTypeInput.required = false;
-  document.getElementById('titleCount').textContent = '0';
-  document.getElementById('previewCount').textContent = '0';
-  document.getElementById('promptCount').textContent = '0';
+    const result = await response.json();
+    console.log('Prompt submitted successfully:', result);
+
+    // Show success modal
+    document.getElementById('successModal').classList.add('show');
+
+    // Reset form
+    this.reset();
+    tagsArray.length = 0;
+    renderTags();
+    socialFields.style.display = 'none';
+    unlockLinkInput.required = false;
+    unlockTypeInput.required = false;
+    previewUrl.required = false;
+    document.getElementById('titleCount').textContent = '0';
+    document.getElementById('previewCount').textContent = '0';
+    document.getElementById('promptCount').textContent = '0';
+
+  } catch (error) {
+    console.error('Error submitting prompt:', error);
+    alert('❌ Failed to submit prompt. Please try again later.');
+  }
 });
 
 // Close modal on background click

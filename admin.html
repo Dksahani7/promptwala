@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PromptWala Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#0f172a;
+  color:#fff;
+  padding:20px;
+}
+h1{margin-bottom:20px;}
+.card{
+  background:#020617;
+  padding:15px;
+  border-radius:8px;
+  margin-bottom:15px;
+}
+button{
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  margin-right:5px;
+}
+.feature{background:#22c55e;}
+.remove{background:#ef4444;}
+input{
+  padding:6px;
+  border-radius:4px;
+  border:none;
+  margin-top:5px;
+  width:100%;
+}
+.badge{
+  font-size:12px;
+  background:#f59e0b;
+  padding:3px 8px;
+  border-radius:10px;
+  margin-left:6px;
+}
+</style>
+</head>
+
+<body>
+
+<script>
+const pass = prompt("Enter admin password");
+if (!pass) {
+  document.body.innerHTML = "<h2>Access Denied</h2>";
+} else {
+  window.adminSecret = pass;
+}
+</script>
+
+<h1>🔥 PromptWala Admin Panel</h1>
+<div id="list">Loading...</div>
+
+<script>
+const API = "https://promptwala-api.ashokjaji7890.workers.dev";
+
+fetch(API + "/prompts")
+  .then(r => r.json())
+  .then(prompts => {
+    const box = document.getElementById("list");
+    box.innerHTML = "";
+
+    prompts.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "card";
+
+      div.innerHTML = `
+        <h3>${p.title}
+          ${p.featured ? '<span class="badge">FEATURED</span>' : ''}
+        </h3>
+
+        <p>${p.preview || ''}</p>
+
+        <button class="feature" onclick="featurePrompt('${p.id}')">
+          Feature 24h
+        </button>
+
+        <button class="remove" onclick="removeFeature('${p.id}')">
+          Remove Feature
+        </button>
+
+        <br><br>
+        <input placeholder="Unlock Link"
+          value="${p.unlockLink || ''}"
+          onchange="updateLink('${p.id}', this.value)">
+      `;
+
+      box.appendChild(div);
+    });
+  });
+
+function featurePrompt(id){
+  updatePrompt(id, {
+    featured: true,
+    featuredTill: Date.now() + 24*60*60*1000
+  });
+}
+
+function removeFeature(id){
+  updatePrompt(id, {
+    featured: false,
+    featuredTill: 0
+  });
+}
+
+function updateLink(id, link){
+  updatePrompt(id, { unlockLink: link });
+}
+
+function updatePrompt(id, updates){
+  fetch(API + "/admin-update",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "X-Admin-Secret": window.adminSecret
+    },
+    body: JSON.stringify({ id, updates })
+  }).then(r => {
+    if (r.status === 403) {
+      alert("Unauthorized: Invalid admin password");
+    } else {
+      location.reload();
+    }
+  });
+}
+</script>
+</body>
+</html>

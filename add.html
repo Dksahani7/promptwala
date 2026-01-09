@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Add Prompt – PromptWala</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #0a0e27;
+  color: #e5e7eb;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.bg-gradient {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at top, #1e3a8a 0%, #0a0e27 50%);
+  z-index: -1;
+}
+
+.bg-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(at 20% 30%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+    radial-gradient(at 80% 70%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
+  animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+header {
+  background: rgba(10, 14, 39, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.logo h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+}
+
+.back-link {
+  color: #94a3b8;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-link:hover {
+  color: #3b82f6;
+}
+
+.hero {
+  max-width: 800px;
+  margin: 60px auto 40px;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.hero h2 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+.form-wrapper {
+  max-width: 700px;
+  margin: 0 auto 60px;
+  padding: 0 20px;
+}
+
+.form-container {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.form-group {
+  margin-bottom: 28px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 10px;
+  color: #f1f5f9;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid rgba(99, 102, 241, 0.2);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.6);
+  color: #fff;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #64748b;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.form-group select {
+  cursor: pointer;
+}
+
+.helper-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.char-count {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  margin-top: 32px;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(59, 130, 246, 0.5);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+.info-card {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 32px;
+}
+
+.info-card h3 {
+  color: #3b82f6;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.info-card li {
+  color: #cbd5e1;
+  margin-bottom: 10px;
+  padding-left: 24px;
+  position: relative;
+  line-height: 1.6;
+}
+
+.info-card li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.example-card {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.example-card h3 {
+  color: #22c55e;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.example-item {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border-left: 3px solid #22c55e;
+}
+
+.example-item strong {
+  color: #22c55e;
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.example-item span {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.tag-input-wrapper {
+  position: relative;
+}
+
+.tags-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.tag {
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: tagAppear 0.3s ease;
+}
+
+@keyframes tagAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.tag button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  width: auto;
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  box-shadow: none;
+}
+
+.tag button:hover {
+  opacity: 1;
+  transform: none;
+}
+
+.success-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-modal.show {
+  display: flex;
+}
+
+.success-content {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 24px;
+  padding: 40px;
+  text-align: center;
+  max-width: 500px;
+  margin: 20px;
+  animation: modalAppear 0.3s ease;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.success-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.success-content h3 {
+  font-size: 1.8rem;
+  color: #22c55e;
+  margin-bottom: 16px;
+}
+
+.success-content p {
+  color: #cbd5e1;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.modal-btn {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.modal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+}
+
+footer {
+  background: rgba(10, 14, 39, 0.8);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(99, 102, 241, 0.2);
+  padding: 40px 20px;
+  text-align: center;
+  color: #64748b;
+  margin-top: 60px;
+}
+
+footer a {
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+footer a:hover {
+  color: #8b5cf6;
+}
+
+@media (max-width: 768px) {
+  .hero h2 {
+    font-size: 2rem;
+  }
+
+  .form-container {
+    padding: 24px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="bg-gradient"></div>
+
+<header>
+  <div class="header-content">
+    <a href="index.html" class="logo">
+      <span class="logo-icon">🚀</span>
+      <h1>PromptWala</h1>
+    </a>
+    <a href="index.html" class="back-link">
+      <span>←</span> Back to Home
+    </a>
+  </div>
+</header>
+
+<section class="hero">
+  <h2>Share Your AI Prompt</h2>
+  <p>Contribute to the community and help others discover amazing prompts</p>
+</section>
+
+<div class="form-wrapper">
+  <form class="form-container" id="addPromptForm">
+    <div class="form-group">
+      <label for="title">
+        Prompt Title <span class="required">*</span>
+      </label>
+      <input 
+        type="text" 
+        id="title" 
+        placeholder="e.g., ChatGPT Business Idea Generator" 
+        required
+        maxlength="100">
+      <div class="char-count"><span id="titleCount">0</span>/100</div>
+    </div>
+
+    <div class="form-group">
+      <label for="category">
+        Category <span class="required">*</span>
+      </label>
+      <select id="category" required>
+        <option value="">Select a category</option>
+        <option value="Platform / Model">🤖 Platform / Model</option>
+        <option value="Image & Design">🎨 Image & Design</option>
+        <option value="Video & Motion">🎬 Video & Motion</option>
+        <option value="Writing & Content">✍️ Writing & Content</option>
+        <option value="Coding & Development">💻 Coding & Development</option>
+        <option value="Business & Money">💰 Business & Money</option>
+        <option value="Marketing & Growth">📈 Marketing & Growth</option>
+        <option value="Social Media & Creator">📱 Social Media & Creator</option>
+        <option value="Productivity & Life">⚡ Productivity & Life</option>
+        <option value="Education & Skill Learning">📚 Education & Skill Learning</option>
+        <option value="Tools, Systems & Workflows">🛠️ Tools, Systems & Workflows</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="tags">
+        Tags (optional)
+      </label>
+      <div class="tag-input-wrapper">
+        <input 
+          type="text" 
+          id="tags" 
+          placeholder="Type tag and press Enter (e.g., viral, chatgpt, business)">
+        <span class="helper-text">Press Enter after each tag. Max 5 tags.</span>
+        <div class="tags-display" id="tagsDisplay"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="preview">
+        Preview Text <span class="required">*</span>
+      </label>
+      <textarea 
+        id="preview" 
+        placeholder="Write a short, engaging preview that will be visible before unlocking..." 
+        required
+        maxlength="200"></textarea>
+      <div class="char-count"><span id="previewCount">0</span>/200</div>
+      <span class="helper-text">This text will be visible to users before they unlock your prompt</span>
+    </div>
+
+    <div class="form-group">
+      <label for="fullPrompt">
+        Full Prompt <span class="required">*</span>
+      </label>
+      <textarea
+        id="fullPrompt"
+        placeholder="Enter the complete AI prompt here. Be detailed and specific..."
+        required
+        maxlength="2000"></textarea>
+      <div class="char-count"><span id="promptCount">0</span>/2000</div>
+      <span class="helper-text">The complete prompt that users will get after unlocking</span>
+    </div>
+
+    <div class="form-group">
+      <label for="accessType">Access Type <span class="required">*</span></label>
+      <select id="accessType" required>
+        <option value="">Select access type</option>
+        <option value="free">Free – instantly usable</option>
+        <option value="social">Social Unlock (visit/like)</option>
+      </select>
+      <span class="helper-text">
+        Choose if your prompt should be free or require a social action to unlock.
+      </span>
+    </div>
+
+    <div id="socialFields" style="display:none;">
+      <div class="form-group">
+        <label for="unlockLink">Social Media Link <span class="required">*</span></label>
+        <input
+          type="url"
+          id="unlockLink"
+          placeholder="https://instagram.com/p/xxxxx">
+        <span class="helper-text">Instagram, Facebook, Twitter/X, or YouTube post link</span>
+      </div>
+
+      <div class="form-group">
+        <label for="unlockType">Unlock Action <span class="required">*</span></label>
+        <select id="unlockType">
+          <option value="visit">👁️ Visit - Users just need to open the link</option>
+          <option value="like">❤️ Like - Users should visit and engage</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">
+      <span>🚀</span> Submit Prompt for Review
+    </button>
+
+    <div class="example-card">
+      <h3>💡 Example</h3>
+      <div class="example-item">
+        <strong>Good Preview:</strong>
+        <span>"Create engaging YouTube scripts with strong hooks and SEO optimization..."</span>
+      </div>
+      <div class="example-item">
+        <strong>Good Full Prompt:</strong>
+        <span>"Act as a YouTube scriptwriter. Create a compelling script for [TOPIC]. Start with a hook in the first 10 seconds that grabs attention..."</span>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>📋 Submission Guidelines</h3>
+      <ul>
+        <li>Submit only original prompts you've created or have permission to share</li>
+        <li>Provide valid social media links from Instagram, Facebook, Twitter, or YouTube</li>
+        <li>No NSFW, spam, misleading, or malicious content</li>
+        <li>Write clear, actionable prompts with specific instructions</li>
+        <li>All submissions are reviewed before going live</li>
+      </ul>
+    </div>
+  </form>
+</div>
+
+<div class="success-modal" id="successModal">
+  <div class="success-content">
+    <div class="success-icon">✅</div>
+    <h3>Prompt Submitted!</h3>
+    <p>Thank you for contributing to PromptWala! Your prompt has been submitted for review and will be live soon.</p>
+    <a href="index.html" class="modal-btn">Browse Prompts</a>
+  </div>
+</div>
+
+<footer>
+  <p>© 2024 PromptWala • Built with ❤️ for AI enthusiasts</p>
+  <p><a href="index.html">Home</a> | <a href="#">Privacy</a> | <a href="#">Terms</a></p>
+</footer>
+
+<script>
+const tagsArray = [];
+const maxTags = 5;
+
+// Character counters
+const titleInput = document.getElementById('title');
+const previewInput = document.getElementById('preview');
+const promptInput = document.getElementById('fullPrompt');
+
+titleInput.addEventListener('input', () => {
+  document.getElementById('titleCount').textContent = titleInput.value.length;
+});
+
+previewInput.addEventListener('input', () => {
+  document.getElementById('previewCount').textContent = previewInput.value.length;
+});
+
+promptInput.addEventListener('input', () => {
+  document.getElementById('promptCount').textContent = promptInput.value.length;
+});
+
+// Tag handling
+const tagsInput = document.getElementById('tags');
+const tagsDisplay = document.getElementById('tagsDisplay');
+
+tagsInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const tag = tagsInput.value.trim().toLowerCase();
+    
+    if (tag && !tagsArray.includes(tag) && tagsArray.length < maxTags) {
+      tagsArray.push(tag);
+      renderTags();
+      tagsInput.value = '';
+    } else if (tagsArray.length >= maxTags) {
+      alert(`Maximum ${maxTags} tags allowed`);
+    }
+  }
+});
+
+function renderTags() {
+  tagsDisplay.innerHTML = tagsArray.map((tag, index) => `
+    <div class="tag">
+      #${tag}
+      <button type="button" onclick="removeTag(${index})">×</button>
+    </div>
+  `).join('');
+}
+
+function removeTag(index) {
+  tagsArray.splice(index, 1);
+  renderTags();
+}
+
+// Access type handling
+const accessType = document.getElementById('accessType');
+const socialFields = document.getElementById('socialFields');
+const unlockLinkInput = document.getElementById('unlockLink');
+const unlockTypeInput = document.getElementById('unlockType');
+
+accessType.addEventListener('change', () => {
+  if (accessType.value === 'social') {
+    socialFields.style.display = 'block';
+    unlockLinkInput.required = true;
+    unlockTypeInput.required = true;
+  } else {
+    socialFields.style.display = 'none';
+    unlockLinkInput.required = false;
+    unlockTypeInput.required = false;
+    unlockLinkInput.value = '';
+    unlockTypeInput.value = '';
+  }
+});
+
+// Form submission
+document.getElementById('addPromptForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const title = document.getElementById('title').value.trim();
+  const category = document.getElementById('category').value;
+  const preview = document.getElementById('preview').value.trim();
+  const fullPrompt = document.getElementById('fullPrompt').value.trim();
+  const accessTypeValue = document.getElementById('accessType').value;
+  const unlockLink = document.getElementById('unlockLink').value.trim();
+  const unlockType = document.getElementById('unlockType').value;
+
+  // Validate social fields if selected
+  if (accessTypeValue === 'social') {
+    // Validate URL
+    try {
+      new URL(unlockLink);
+    } catch {
+      alert('❌ Please enter a valid URL for the social media link.');
+      return;
+    }
+
+    // Check if link is from allowed platforms
+    const allowedDomains = ['instagram.com', 'facebook.com', 'twitter.com', 'x.com', 'youtube.com'];
+    const url = new URL(unlockLink);
+    if (!allowedDomains.some(domain => url.hostname.includes(domain))) {
+      alert('❌ Please use links from Instagram, Facebook, Twitter, or YouTube only.');
+      return;
+    }
+  }
+
+  // Generate ID
+  const id = Date.now().toString();
+
+  // Create prompt object
+  const newPrompt = {
+    id,
+    title,
+    category,
+    tags: tagsArray,
+    preview,
+    fullPrompt,
+    accessType: accessTypeValue,
+    ...(accessTypeValue === 'social' && { unlockLink, unlockType }),
+    submittedAt: new Date().toISOString()
+  };
+
+  // Save to localStorage
+  const existingPrompts = JSON.parse(localStorage.getItem('userPrompts') || '[]');
+  existingPrompts.push(newPrompt);
+  localStorage.setItem('userPrompts', JSON.stringify(existingPrompts));
+
+  // Show success modal
+  document.getElementById('successModal').classList.add('show');
+
+  // Reset form
+  this.reset();
+  tagsArray.length = 0;
+  renderTags();
+  socialFields.style.display = 'none';
+  unlockLinkInput.required = false;
+  unlockTypeInput.required = false;
+  document.getElementById('titleCount').textContent = '0';
+  document.getElementById('previewCount').textContent = '0';
+  document.getElementById('promptCount').textContent = '0';
+});
+
+// Close modal on background click
+document.getElementById('successModal').addEventListener('click', (e) => {
+  if (e.target.id === 'successModal') {
+    document.getElementById('successModal').classList.remove('show');
+  }
+});
+</script>
+
+</body>
+</html>
